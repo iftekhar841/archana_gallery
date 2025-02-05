@@ -1,0 +1,32 @@
+{
+  "name": "archana_gallery",
+  "version": "1.0.0",
+  "description": "This project is related to auction and exihibitions the art gallaries.",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon -r dotenv/config server.js",
+    "dev": "nodemon -r dotenv/config server.js"
+  },
+  "keywords": [
+    "Step",
+    "By",
+    "Step",
+    "Code"
+  ],
+  "author": "Md Iftekhar Alam",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "save": "^2.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
