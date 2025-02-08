@@ -1,6 +1,7 @@
 const userService = require("../services/userService");
+const asyncHandler = require("../utils/asyncHandler");
 
-const registerUser = async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
   try {
     if (
       !req.body.fullName ||
@@ -26,9 +27,9 @@ const registerUser = async (req, res) => {
       message: error.message,
     });
   }
-};
+});
 
-const userLogin = async (req, res) => {
+const userLogin = asyncHandler(async (req, res) => {
   try {
     if (!req.body.email || !req.body.password) {
       return res
@@ -58,9 +59,9 @@ const userLogin = async (req, res) => {
       message: error.message || "Authentication failed.",
     });
   }
-};
+});
 
-const userLogout = async (req, res) => {
+const userLogout = asyncHandler(async (req, res) => {
   try {
     const logoutResponse = await userService.userLogout();
     console.log("logout", logoutResponse);
@@ -84,7 +85,7 @@ const userLogout = async (req, res) => {
       message: error.message || "Logout failed.",
     });
   }
-};
+});
 
 module.exports = {
   registerUser,
