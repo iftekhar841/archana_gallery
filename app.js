@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
+const fileUpload = require("express-fileupload");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(helmet());
+app.use(fileUpload()); // Enable file upload middleware
 
 // Globally invalid routes handles
 // app.use((req, res, next) => {
@@ -33,11 +35,16 @@ app.use(helmet());
 // });
 
 // Route Import Here
-const { userRoute, artistRoute } = require("./src/routes/index.js");
+const {
+  userRoute,
+  artistRoute,
+  artWorkRoute,
+} = require("./src/routes/index.js");
 
 //routes declaration
 app.use("/api/user", userRoute);
 app.use("/api/artist", artistRoute);
+app.use("/api/artWork", artWorkRoute);
 
 app.get("/", (req, res) => {
   res.send("Now we are showing the data from here");
