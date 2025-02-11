@@ -12,6 +12,7 @@ cloudinary.config({
  * @param {string} folder - The folder name where the image should be stored.
  * @returns {Promise<string>} - Secure URL of the uploaded image.
  */
+
 const uploadImageToCloudinary = async (file, folder) => {
   try {
     if (!file) {
@@ -45,4 +46,59 @@ const uploadImageToCloudinary = async (file, folder) => {
   }
 };
 
-module.exports = uploadImageToCloudinary;
+// Function to delete the video and images from the cloudinary
+const deleteImageToCloudinary = async (publicIds, resourceType = "image") => {
+  if (!publicIds || publicIds.length === 0) return null;
+
+  publicIds = Array.isArray(publicIds) ? publicIds : [publicIds];
+
+  const deletedItems = [];
+
+  for (const publicId of publicIds) {
+    try {
+      console.log(`🚀 Deleting from Cloudinary: ${publicId}`);
+
+      const deletionResponse = await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+      });
+
+      if (deletionResponse.result === "ok") {
+        deletedItems.push({ publicId, resourceType });
+      } else {
+        console.warn(
+          `⚠️ Failed to delete (${publicId}): ${deletionResponse.result}`
+        );
+      }
+    } catch (error) {
+      console.error(
+        `🚨 Error deleting image: ${publicId}, Error: ${error.message}`
+      );
+    }
+  }
+
+  return deletedItems;
+};
+
+// Function to extract Cloudinary Public ID from URL
+const getPublicIdFromCloudinaryUrl = (url) => {
+  console.log("🔍 Extracting Cloudinary Public ID:", url);
+
+  if (Array.isArray(url)) {
+    return url.map((singleUrl) => extractPublicId(singleUrl));
+  }
+
+  return extractPublicId(url);
+};
+
+// Helper function to extract public ID
+const extractPublicId = (url) => {
+  const segments = url.split("/");
+  const lastTwoSegments = segments.slice(-2).join("/");
+  return lastTwoSegments.replace(/\.[^/.]+$/, ""); // Remove file extension
+};
+
+module.exports = {
+  uploadImageToCloudinary,
+  deleteImageToCloudinary,
+  getPublicIdFromCloudinaryUrl,
+};

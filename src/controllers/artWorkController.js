@@ -1,7 +1,11 @@
 const artWorkService = require("../services/artWorkService");
 const artistService = require("../services/artistService");
 const asyncHandler = require("../utils/asyncHandler");
-const uploadImageToCloudinary = require("../utils/cloudinary");
+const {
+  uploadImageToCloudinary,
+  getPublicIdFromCloudinaryUrl,
+  deleteImageToCloudinary,
+} = require("../utils/cloudinary");
 const mongoose = require("mongoose");
 
 const addArtWork = asyncHandler(async (req, res) => {
@@ -158,6 +162,36 @@ const updateArtWork = asyncHandler(async (req, res) => {
       await artistService.getSingleArtistById(updateFields.artist);
     }
 
+    // ✅ Handle artwork image update
+    let artworkFiles = req.files?.artWorkImage;
+    if (artworkFiles) {
+      // Ensure artworkFiles is an array
+      if (!Array.isArray(artworkFiles)) {
+        artworkFiles = [artworkFiles];
+      }
+
+      // Fetch existing artwork details
+      const existingArtwork = await artWorkService.getSingleArtworkById(
+        artworkId
+      );
+      // Extract and delete existing images from Cloudinary
+      const publicIds = getPublicIdFromCloudinaryUrl(
+        existingArtwork.artWorkImage
+      );
+      await deleteImageToCloudinary(
+        Array.isArray(publicIds) ? publicIds : [publicIds]
+      );
+
+      // Upload new images to Cloudinary
+      console.log("Uploading new images to Cloudinary...");
+      const uploadedImageUrls = await Promise.all(
+        artworkFiles.map((file) => uploadImageToCloudinary(file, "artworks"))
+      );
+
+      // Update artwork images in the request body
+      updateFields.artWorkImage = uploadedImageUrls;
+    }
+
     // ✅ Call service to update artwork
     const updatedArtwork = await artWorkService.updateArtWork(
       artworkId,
@@ -210,7 +244,6 @@ const deleteArtworkById = asyncHandler(async (req, res) => {
   try {
     // Fetch logged-in user
     const loggedInUser = req.user;
-    console.log("logeed", loggedInUser);
 
     // Check if user is an admin
     if (!loggedInUser || loggedInUser.role !== process.env.IS_ADMIN) {
@@ -228,6 +261,14 @@ const deleteArtworkById = asyncHandler(async (req, res) => {
         message: "Invalid or missing Artwork ID.",
       });
     }
+
+    const artWorkFetch = await artWorkService.getSingleArtworkById(artworkId);
+
+    // Extract public ID and delete image from Cloudinary
+    const publicIds = getPublicIdFromCloudinaryUrl(artWorkFetch.artWorkImage);
+    await deleteImageToCloudinary(
+      Array.isArray(publicIds) ? publicIds : [publicIds]
+    );
 
     // Call service to delete artwork
     const deletedArtwork = await artWorkService.deleteArtworkById(artworkId);

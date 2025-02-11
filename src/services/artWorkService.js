@@ -25,24 +25,24 @@ const addArtWork = async (artWorkDetails) => {
 
 const updateArtWork = async (artworkId, updateFields) => {
   // Find artwork by ID
-  const existingArtist = await ArtWork.findById(artworkId);
+  const existingArtwork = await ArtWork.findById(artworkId);
 
-  if (!existingArtist) {
-    throw new Error("Artist does not exist.");
+  if (!existingArtwork) {
+    throw new Error("Artwork does not exist.");
   }
 
   // Update artworks details
-  const updatedArtist = await ArtWork.findByIdAndUpdate(
+  const updatedArtwork = await ArtWork.findByIdAndUpdate(
     artworkId,
     { $set: updateFields },
     { new: true, runValidators: true }
   );
 
-  if (!updatedArtist) {
-    throw new Error("Failed to update the artist, please try again.");
+  if (!updatedArtwork) {
+    throw new Error("Failed to update the artwork, please try again.");
   }
 
-  return updatedArtist;
+  return updatedArtwork;
 };
 
 const getArtWorks = async () => {
@@ -57,18 +57,29 @@ const getArtWorks = async () => {
 
 const deleteArtworkById = async (artworkId) => {
   // Directly delete the artwork and check if it exists in one query
-  const deletedArtist = await ArtWork.findByIdAndDelete(artworkId);
+  const deletedArtwork = await ArtWork.findByIdAndDelete(artworkId);
 
-  if (!deletedArtist) {
+  if (!deletedArtwork) {
     throw new Error("Artwork does not exist or has already been deleted.");
   }
 
-  return deletedArtist;
+  return deletedArtwork;
+};
+
+const getSingleArtworkById = async (artworkId) => {
+  const artwork = await ArtWork.findById(artworkId);
+
+  if (!artwork) {
+    throw new Error("Artwork does not exist or has already been deleted.");
+  }
+
+  return artwork;
 };
 
 module.exports = {
   addArtWork,
   updateArtWork,
   getArtWorks,
+  getSingleArtworkById,
   deleteArtworkById,
 };
