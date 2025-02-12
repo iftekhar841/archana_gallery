@@ -288,9 +288,41 @@ const deleteArtworkById = asyncHandler(async (req, res) => {
   }
 });
 
+const getArtworksByArtistId = asyncHandler(async (req, res) => {
+  try {
+    const { artistId } = req.params;
+    if (!artistId || !mongoose.Types.ObjectId.isValid(artistId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or missing Artist ID.",
+      });
+    }
+
+    // Check is artist exists or not
+    await artistService.getSingleArtistById(artistId);
+
+    // Call service to delete artwork
+    const artWorkResponse = await artWorkService.getArtworksByArtistId(
+      artistId
+    );
+    return res.status(201).json({
+      success: true,
+      message: "ArtWork Fetching of the artist Successfully.",
+      artWorks: artWorkResponse,
+    });
+  } catch (error) {
+    console.error("Fetching artwork error !", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Fetching artwork of the artist failed !",
+    });
+  }
+});
+
 module.exports = {
   addArtWork,
   updateArtWork,
   getArtWorks,
   deleteArtworkById,
+  getArtworksByArtistId,
 };

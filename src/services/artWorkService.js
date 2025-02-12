@@ -76,10 +76,25 @@ const getSingleArtworkById = async (artworkId) => {
   return artwork;
 };
 
+const getArtworksByArtistId = async (artistId) => {
+  const allArtworks = await ArtWork.find({ artist: artistId }).select(
+    "artWorkImage artist"
+  );
+
+  console.log("🚀 ~ getArtworksByArtistId ~ allArtworks:", allArtworks);
+
+  if (!allArtworks || allArtworks.length === 0) {
+    throw new Error("No artwork record found of the artist");
+  }
+
+  return allArtworks;
+};
+
 module.exports = {
   addArtWork,
   updateArtWork,
   getArtWorks,
   getSingleArtworkById,
   deleteArtworkById,
+  getArtworksByArtistId,
 };
