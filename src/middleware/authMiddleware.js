@@ -45,4 +45,38 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = verifyJWT;
+const optionalVerifyJWT = async (req, res, next) => {
+  try {
+    const token =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!token) {
+      req.user = null; // No token → Public access
+      return next();
+    }
+
+    if (!process.env.ACCESS_TOKEN_KEY) {
+      throw new Error("Server configuration error: Missing access token key");
+    }
+
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
+    const user = await User.findById(decodedToken?.id).select("-password");
+
+    if (!user) {
+      req.user = null; // Invalid token → Treat as public user
+      return next();
+    }
+
+    req.user = user; // Attach user if valid
+    next();
+  } catch (error) {
+    req.user = null; // Invalid token → Treat as public user
+    next();
+  }
+};
+
+module.exports = {
+  verifyJWT,
+  optionalVerifyJWT,
+};

@@ -1,6 +1,9 @@
 const express = require("express");
 const artWorkController = require("../../controllers/artWorkController");
-const verifyJWT = require("../../middleware/authMiddleware");
+const {
+  verifyJWT,
+  optionalVerifyJWT,
+} = require("../../middleware/authMiddleware");
 
 const artWorkRoute = express.Router();
 
@@ -21,6 +24,10 @@ artWorkRoute.delete(
 // Get all artworks by a specific artist
 artWorkRoute.get("/artist/:artistId", artWorkController.getArtworksByArtistId);
 
-artWorkRoute.get("/get-artWorks", verifyJWT, artWorkController.getArtWorks);
+artWorkRoute.get(
+  "/get-artWorks",
+  optionalVerifyJWT,
+  artWorkController.getArtWorks
+);
 
 module.exports = artWorkRoute;

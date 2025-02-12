@@ -1,6 +1,6 @@
 const express = require("express");
 const artistController = require("../../controllers/artistController");
-const verifyJWT = require("../../middleware/authMiddleware");
+const { verifyJWT } = require("../../middleware/authMiddleware");
 
 const artistRoute = express.Router();
 

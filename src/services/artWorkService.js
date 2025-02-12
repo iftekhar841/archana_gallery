@@ -1,9 +1,11 @@
 const ArtWork = require("../models/artWorkSchema");
 
 const addArtWork = async (artWorkDetails) => {
-  const { artWorkImage, artist, priceRange, description } = artWorkDetails;
+  const { artWorkName, artWorkImage, artist, priceRange, description } =
+    artWorkDetails;
 
   const newArtWork = await ArtWork.create({
+    artWorkName,
     artWorkImage,
     artist,
     priceRange,
@@ -55,6 +57,19 @@ const getArtWorks = async () => {
   return allArtworkToFetch;
 };
 
+const limitedArtWork = async () => {
+  const allArtworkToFetch = await ArtWork.find().populate(
+    "artist",
+    "firstName lastName description"
+  );
+
+  if (!allArtworkToFetch || allArtworkToFetch.length === 0) {
+    throw new Error("No artwork record found");
+  }
+
+  return allArtworkToFetch;
+};
+
 const deleteArtworkById = async (artworkId) => {
   // Directly delete the artwork and check if it exists in one query
   const deletedArtwork = await ArtWork.findByIdAndDelete(artworkId);
@@ -94,7 +109,8 @@ module.exports = {
   addArtWork,
   updateArtWork,
   getArtWorks,
-  getSingleArtworkById,
+  limitedArtWork,
   deleteArtworkById,
+  getSingleArtworkById,
   getArtworksByArtistId,
 };

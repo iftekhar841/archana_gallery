@@ -18,14 +18,14 @@ const addArtWork = asyncHandler(async (req, res) => {
         : "No image uploaded"
     );
 
-    const { artist, priceRange, description } = req.body;
+    const { artist, priceRange, description, artWorkName } = req.body;
 
     // Validate required text fields
-    if (!artist || !priceRange || !description) {
+    if (!artist || !priceRange || !description || !artWorkName) {
       return res.status(400).json({
         success: false,
         message:
-          "Missing required fields: artist, priceRange, and description.",
+          "Missing required fields: artWorkName, artist, priceRange, and description.",
       });
     }
 
@@ -80,6 +80,7 @@ const addArtWork = asyncHandler(async (req, res) => {
 
     // Save artwork details to the database
     const newArtwork = await artWorkService.addArtWork({
+      artWorkName,
       artWorkImage: uploadedImageUrls, // Array of image URLs
       artist: checkIsArtistExist,
       priceRange,
@@ -216,21 +217,31 @@ const updateArtWork = asyncHandler(async (req, res) => {
 const getArtWorks = asyncHandler(async (req, res) => {
   try {
     // Fetch logged user
-    const loggedInUser = req.user;
+    const isAuthenticated = req.user;
+    console.log("🚀 ~ getArtWorks ~ isAuthenticated:", isAuthenticated);
 
-    if (!loggedInUser || loggedInUser.role !== process.env.IS_ADMIN) {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized! Only admins can view artWork.",
+    if (isAuthenticated) {
+      if (isAuthenticated.role !== process.env.IS_ADMIN) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized! Only admins can view artWork.",
+        });
+      }
+
+      const artWorkResponse = await artWorkService.getArtWorks();
+      return res.status(200).json({
+        success: true,
+        message: "ArtWork Fetching Successfully.",
+        artWorks: artWorkResponse,
+      });
+    } else {
+      const limitedArtWorkResponse = await artWorkService.limitedArtWork();
+      return res.status(200).json({
+        success: true,
+        message: "ArtWork Fetching Successfully.",
+        artWorks: limitedArtWorkResponse,
       });
     }
-
-    const artWorkResponse = await artWorkService.getArtWorks();
-    return res.status(201).json({
-      success: true,
-      message: "ArtWork Fetching Successfully.",
-      artWorks: artWorkResponse,
-    });
   } catch (error) {
     console.error("Fetching artwork error !", error);
     return res.status(500).json({

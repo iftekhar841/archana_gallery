@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const artWorkSchema = new mongoose.Schema(
   {
+    artWorkName: {
+      type: String,
+      required: true,
+    },
     artWorkImage: {
       type: Array,
       required: true,
