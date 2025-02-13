@@ -39,12 +39,14 @@ const {
   userRoute,
   artistRoute,
   artWorkRoute,
+  homeRoute,
 } = require("./src/routes/index.js");
 
 //routes declaration
 app.use("/api/user", userRoute);
 app.use("/api/artist", artistRoute);
 app.use("/api/artWork", artWorkRoute);
+app.use("/api/banner", homeRoute);
 
 app.get("/", (req, res) => {
   res.send("Now we are showing the data from here");

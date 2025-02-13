@@ -24,6 +24,6 @@ artistRoute.get(
   artistController.getSingleArtistById
 );
 
-artistRoute.get("/get-artists", verifyJWT, artistController.getAllArtists);
+artistRoute.get("/get-artists", artistController.getAllArtists);
 
 module.exports = artistRoute;

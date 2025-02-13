@@ -20,6 +20,10 @@ const artistSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    artistImage: {
+      type: Array,
+      required: true,
+    },
     dateOfBirth: {
       type: String, // Store as String to maintain custom format
       required: true,

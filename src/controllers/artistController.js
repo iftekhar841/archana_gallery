@@ -2,9 +2,18 @@ const artistService = require("../services/artistService");
 const asyncHandler = require("../utils/asyncHandler");
 const moment = require("moment");
 const mongoose = require("mongoose");
+const { uploadImageToCloudinary } = require("../utils/cloudinary");
 
 const addArtist = asyncHandler(async (req, res) => {
   try {
+    let artistFiles = req.files?.artistImage; // Get uploaded image(s)
+    console.log(
+      "Received Image(s):",
+      artistFiles
+        ? artistFiles.name || "Multiple files uploaded"
+        : "No image uploaded"
+    );
+
     const {
       artistEmail,
       firstName,
@@ -50,10 +59,30 @@ const addArtist = asyncHandler(async (req, res) => {
       });
     }
 
+    // Validate artwork files
+    if (!artistFiles) {
+      return res.status(400).json({
+        success: false,
+        message: "Artist image(s) required. Please upload one or more artist.",
+      });
+    }
+
+    // Ensure artistFiles is an array (for multiple uploads)
+    if (!Array.isArray(artistFiles)) {
+      artistFiles = [artistFiles]; // Convert single file object into an array
+    }
+
+    // Upload each image to Cloudinary (inside 'artworks' folder)
+    console.log("Uploading images to Cloudinary...");
+    const uploadedImageUrls = await Promise.all(
+      artistFiles.map((file) => uploadImageToCloudinary(file, "artists"))
+    );
+
     const artistResponse = await artistService.addArtist({
       artistEmail,
       firstName,
       lastName,
+      artistImage: uploadedImageUrls, //Array of image URLs
       presentAddress,
       description,
       dateOfBirth: formattedDOB,

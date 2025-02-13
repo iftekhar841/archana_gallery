@@ -78,7 +78,13 @@ const deleteArtworkById = async (artworkId) => {
     throw new Error("Artwork does not exist or has already been deleted.");
   }
 
-  return deletedArtwork;
+  const fetchAllArtwork = await ArtWork.find();
+
+  if (!fetchAllArtwork || fetchAllArtwork.length === 0) {
+    throw new Error("No artwork record found.");
+  }
+
+  return fetchAllArtwork;
 };
 
 const getSingleArtworkById = async (artworkId) => {
