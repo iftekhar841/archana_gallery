@@ -1,14 +1,15 @@
 const ArtWork = require("../models/artWorkSchema");
 
 const addArtWork = async (artWorkDetails) => {
-  const { artWorkName, artWorkImage, artist, priceRange, description } =
+  const { artWorkName, artWorkImage, artist, minPrice, maxPrice, description } =
     artWorkDetails;
 
   const newArtWork = await ArtWork.create({
     artWorkName,
     artWorkImage,
     artist,
-    priceRange,
+    minPrice,
+    maxPrice,
     description,
   });
 

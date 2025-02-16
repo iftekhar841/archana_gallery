@@ -18,14 +18,14 @@ const addArtWork = asyncHandler(async (req, res) => {
         : "No image uploaded"
     );
 
-    const { artist, priceRange, description, artWorkName } = req.body;
+    const { artist, minPrice, maxPrice, description, artWorkName } = req.body;
 
     // Validate required text fields
-    if (!artist || !priceRange || !description || !artWorkName) {
+    if (!artist || !minPrice || !maxPrice || !description || !artWorkName) {
       return res.status(400).json({
         success: false,
         message:
-          "Missing required fields: artWorkName, artist, priceRange, and description.",
+          "Missing required fields: artWorkName, artist, minPrice, maxPrice, and description.",
       });
     }
 
@@ -34,15 +34,6 @@ const addArtWork = asyncHandler(async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid Artist ID format.",
-      });
-    }
-
-    // ✅ Validate `priceRange` format before uploading images
-    const priceRegex = /^\$\d{3}-\d{3}$|^\$\d{3}$/;
-    if (!priceRegex.test(priceRange)) {
-      return res.status(400).json({
-        success: false,
-        message: "Price should be in format '$200-500' or '$400'.",
       });
     }
 
@@ -83,7 +74,8 @@ const addArtWork = asyncHandler(async (req, res) => {
       artWorkName,
       artWorkImage: uploadedImageUrls, // Array of image URLs
       artist: checkIsArtistExist,
-      priceRange,
+      minPrice,
+      maxPrice,
       description,
     });
 
@@ -134,17 +126,6 @@ const updateArtWork = asyncHandler(async (req, res) => {
         success: false,
         message: "At least one field is required for update.",
       });
-    }
-
-    // ✅ Validate priceRange format (if provided)
-    if (updateFields.priceRange) {
-      const priceRegex = /^\$\d{3}-\d{3}$|^\$\d{3}$/;
-      if (!priceRegex.test(updateFields.priceRange)) {
-        return res.status(400).json({
-          success: false,
-          message: "Price should be in format '$200-500' or '$400'.",
-        });
-      }
     }
 
     // ✅ Validate artist ID format (if provided)

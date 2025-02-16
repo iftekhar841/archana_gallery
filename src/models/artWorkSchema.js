@@ -15,8 +15,12 @@ const artWorkSchema = new mongoose.Schema(
       ref: "Artist",
       required: true,
     },
-    priceRange: {
-      type: String,
+    minPrice: {
+      type: Number,
+      required: true,
+    },
+    maxPrice: {
+      type: Number,
       required: true,
     },
     description: {
