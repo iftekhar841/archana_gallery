@@ -195,43 +195,6 @@ const updateArtWork = asyncHandler(async (req, res) => {
   }
 });
 
-const getArtWorks = asyncHandler(async (req, res) => {
-  try {
-    // Fetch logged user
-    const isAuthenticated = req.user;
-    console.log("🚀 ~ getArtWorks ~ isAuthenticated:", isAuthenticated);
-
-    if (isAuthenticated) {
-      if (isAuthenticated.role !== process.env.IS_ADMIN) {
-        return res.status(403).json({
-          success: false,
-          message: "Unauthorized! Only admins can view artWork.",
-        });
-      }
-
-      const artWorkResponse = await artWorkService.getArtWorks();
-      return res.status(200).json({
-        success: true,
-        message: "ArtWork Fetching Successfully.",
-        artWorks: artWorkResponse,
-      });
-    } else {
-      const limitedArtWorkResponse = await artWorkService.limitedArtWork();
-      return res.status(200).json({
-        success: true,
-        message: "ArtWork Fetching Successfully.",
-        artWorks: limitedArtWorkResponse,
-      });
-    }
-  } catch (error) {
-    console.error("Fetching artwork error !", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Fetching artwork failed !",
-    });
-  }
-});
-
 const deleteArtworkById = asyncHandler(async (req, res) => {
   try {
     // Fetch logged-in user
@@ -307,6 +270,43 @@ const getArtworksByArtistId = asyncHandler(async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Fetching artwork of the artist failed !",
+    });
+  }
+});
+
+const getArtWorks = asyncHandler(async (req, res) => {
+  try {
+    // Fetch logged user
+    const isAuthenticated = req.user;
+    console.log("🚀 ~ getArtWorks ~ isAuthenticated:", isAuthenticated);
+
+    if (isAuthenticated) {
+      if (isAuthenticated.role !== process.env.IS_ADMIN) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized! Only admins can view artWork.",
+        });
+      }
+
+      const artWorkResponse = await artWorkService.getArtWorks();
+      return res.status(200).json({
+        success: true,
+        message: "ArtWork Fetching Successfully.",
+        artWorks: artWorkResponse,
+      });
+    } else {
+      const limitedArtWorkResponse = await artWorkService.limitedArtWork();
+      return res.status(200).json({
+        success: true,
+        message: "ArtWork Fetching Successfully.",
+        artWorks: limitedArtWorkResponse,
+      });
+    }
+  } catch (error) {
+    console.error("Fetching artwork error !", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Fetching artwork failed !",
     });
   }
 });

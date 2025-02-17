@@ -1,6 +1,9 @@
 const express = require("express");
 const artistController = require("../../controllers/artistController");
-const { verifyJWT } = require("../../middleware/authMiddleware");
+const {
+  verifyJWT,
+  optionalVerifyJWT,
+} = require("../../middleware/authMiddleware");
 
 const artistRoute = express.Router();
 
@@ -20,7 +23,7 @@ artistRoute.delete(
 
 artistRoute.get(
   "/get-singleArtist/:artistId",
-  verifyJWT,
+  optionalVerifyJWT,
   artistController.getSingleArtistById
 );
 

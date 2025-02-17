@@ -99,14 +99,10 @@ const getSingleArtworkById = async (artworkId) => {
 };
 
 const getArtworksByArtistId = async (artistId) => {
-  const allArtworks = await ArtWork.find({ artist: artistId }).select(
-    "artWorkImage artist"
-  );
-
-  console.log("🚀 ~ getArtworksByArtistId ~ allArtworks:", allArtworks);
+  const allArtworks = await ArtWork.find({ artist: artistId });
 
   if (!allArtworks || allArtworks.length === 0) {
-    throw new Error("No artwork record found of the artist");
+    throw new Error("No artwork record found of this artist");
   }
 
   return allArtworks;

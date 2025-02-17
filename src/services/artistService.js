@@ -73,15 +73,22 @@ const deleteArtistById = async (artistId) => {
   return deletedArtist;
 };
 
-const getSingleArtistById = async (artistId) => {
-  // Directly delete the artist and check if it exists in one query
+const getSingleArtistById = async (artistId, isAuthenticated) => {
+  // Fetch the artist by ID
   const singleArtist = await Artist.findById(artistId);
 
   if (!singleArtist) {
     throw new Error("Artist does not exist or has already been deleted.");
   }
 
-  return singleArtist;
+  // If a user is authenticated and is an admin, return full details.
+  // Otherwise, return the artist details with the email hidden.
+  if (isAuthenticated && isAuthenticated.role === process.env.IS_ADMIN) {
+    return singleArtist;
+  } else {
+    const { artistEmail, ...artistDataWithoutEmail } = singleArtist.toObject();
+    return artistDataWithoutEmail;
+  }
 };
 
 const getAllArtists = async () => {

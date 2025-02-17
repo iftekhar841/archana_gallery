@@ -165,33 +165,6 @@ const updateArtist = asyncHandler(async (req, res) => {
   }
 });
 
-const getAllArtists = asyncHandler(async (req, res) => {
-  try {
-    // Fetch logged user
-    const loggedInUser = req.user;
-
-    if (!loggedInUser || loggedInUser.role !== process.env.IS_ADMIN) {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized! Only admins can view artists.",
-      });
-    }
-
-    const artistResponse = await artistService.getAllArtists();
-    return res.status(201).json({
-      success: true,
-      message: "Artist Fetching Successfully.",
-      artists: artistResponse,
-    });
-  } catch (error) {
-    console.error("Fetching artist error !", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Fetching artist failed !",
-    });
-  }
-});
-
 const deleteArtistById = asyncHandler(async (req, res) => {
   try {
     // Fetch logged-in user
@@ -206,19 +179,11 @@ const deleteArtistById = asyncHandler(async (req, res) => {
       });
     }
 
-    const { artistId } = req.params;
-    // Validate artist Id
-    if (!artistId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Artist ID is required." });
-    }
-
     // Check if artistId is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(artistId)) {
+    if (!artistId || !mongoose.Types.ObjectId.isValid(artistId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Artist ID format.",
+        message: "Invalid or missing Artist ID format.",
       });
     }
 
@@ -257,41 +222,28 @@ const deleteArtistById = asyncHandler(async (req, res) => {
 
 const getSingleArtistById = asyncHandler(async (req, res) => {
   try {
-    // Fetch logged-in user
-    const loggedInUser = req.user;
-    console.log("logeed", loggedInUser);
-
-    // Check if user is an admin
-    if (!loggedInUser || loggedInUser.role !== process.env.IS_ADMIN) {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized! Only admins can view single artists.",
-      });
-    }
+    // Fetch logged user (if any)
+    const isAuthenticated = req.user;
+    console.log("🚀 ~ getArtWorks ~ isAuthenticated:", isAuthenticated);
 
     const { artistId } = req.params;
-    // Validate artist Id
-    if (!artistId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Artist ID is required." });
-    }
-
     // Check if artistId is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(artistId)) {
+    if (!artistId || !mongoose.Types.ObjectId.isValid(artistId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Artist ID format.",
+        message: "Invalid or missing Artist ID format.",
       });
     }
-
     // Call service to view artist
-    const getSingleArtist = await artistService.getSingleArtistById(artistId);
+    const artistDetails = await artistService.getSingleArtistById(
+      artistId,
+      isAuthenticated
+    );
 
     return res.status(200).json({
       success: true,
       message: "Artist fetch successfully.",
-      artist: getSingleArtist,
+      artist: artistDetails,
     });
   } catch (error) {
     console.error("Error Deleting artist:", error);
@@ -303,17 +255,26 @@ const getSingleArtistById = asyncHandler(async (req, res) => {
         message: "Invalid Artist ID format.",
       });
     }
-
-    // if (error.message.includes("does not exist")) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     message: "Artist does not exist or has already been deleted.",
-    //   });
-    // }
-
     return res.status(500).json({
       success: false,
       message: error.message || "Deleting artist failed!",
+    });
+  }
+});
+
+const getAllArtists = asyncHandler(async (req, res) => {
+  try {
+    const artistResponse = await artistService.getAllArtists();
+    return res.status(201).json({
+      success: true,
+      message: "Artist Fetching Successfully.",
+      artists: artistResponse,
+    });
+  } catch (error) {
+    console.error("Fetching artist error !", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Fetching artist failed !",
     });
   }
 });
