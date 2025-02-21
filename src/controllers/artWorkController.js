@@ -6,6 +6,7 @@ const {
   getPublicIdFromCloudinaryUrl,
   deleteImageToCloudinary,
 } = require("../utils/cloudinary");
+
 const mongoose = require("mongoose");
 
 const addArtWork = asyncHandler(async (req, res) => {
@@ -30,10 +31,10 @@ const addArtWork = asyncHandler(async (req, res) => {
     }
 
     // Check if artistId is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(artist)) {
+    if (!artist || !mongoose.Types.ObjectId.isValid(artist)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Artist ID format.",
+        message: "Invalid or missing Artist ID format.",
       });
     }
 

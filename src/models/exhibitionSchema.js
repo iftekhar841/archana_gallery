@@ -1,26 +1,23 @@
 const mongoose = require("mongoose");
 
-const artWorkSchema = new mongoose.Schema(
+const exhibitionSchema = new mongoose.Schema(
   {
-    artWorkName: {
-      type: String,
-      required: true,
-    },
-    artWorkImage: {
-      type: Array,
-      required: true,
-    },
     artist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Artist",
       required: true,
     },
-    minPrice: {
-      type: Number,
+    artWork: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ArtWork",
       required: true,
     },
-    maxPrice: {
-      type: Number,
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    endDate: {
+      type: Date,
       required: true,
     },
     description: {
@@ -34,6 +31,6 @@ const artWorkSchema = new mongoose.Schema(
   }
 );
 
-const ArtWork = mongoose.model("ArtWork", artWorkSchema);
+const Exhibition = mongoose.model("Exhibition", exhibitionSchema);
 
-module.exports = ArtWork;
+module.exports = Exhibition;
