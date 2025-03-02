@@ -87,8 +87,36 @@ const userLogout = asyncHandler(async (req, res) => {
   }
 });
 
+const isLoginUser = asyncHandler(async (req, res) => {
+  try {
+    // Check if the user is an admin
+    const isAuthenticated = req.user;
+    console.log("is", isAuthenticated);
+
+    if (!isAuthenticated || isAuthenticated.role !== process.env.IS_ADMIN) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Verified User !",
+    });
+  } catch (error) {
+    console.log("err", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Islogin user failed.",
+    });
+  }
+});
+
 module.exports = {
   registerUser,
   userLogin,
   userLogout,
+  isLoginUser,
 };

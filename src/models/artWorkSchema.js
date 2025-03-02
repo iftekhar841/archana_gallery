@@ -7,7 +7,7 @@ const artWorkSchema = new mongoose.Schema(
       required: true,
     },
     artWorkImage: {
-      type: Array,
+      type: String,
       required: true,
     },
     artist: {
@@ -15,11 +15,7 @@ const artWorkSchema = new mongoose.Schema(
       ref: "Artist",
       required: true,
     },
-    minPrice: {
-      type: Number,
-      required: true,
-    },
-    maxPrice: {
+    priceRange: {
       type: Number,
       required: true,
     },

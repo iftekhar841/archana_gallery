@@ -7,19 +7,10 @@ const addArtist = async (artistDetails) => {
     firstName,
     lastName,
     artistImage,
-    presentAddress,
     description,
+    presentAddress,
     dateOfBirth,
   } = artistDetails;
-
-  // Check if artist already exists (Prevent Duplicates)
-  const existingArtist = await Artist.findOne({ artistEmail }).select(
-    "artistEmail"
-  );
-
-  if (existingArtist) {
-    throw new Error("Artist with the same email already exists.");
-  }
 
   const validatedEmail = await validateEmail(artistEmail);
 
@@ -28,8 +19,8 @@ const addArtist = async (artistDetails) => {
     firstName,
     lastName,
     artistImage,
-    presentAddress,
     description,
+    presentAddress,
     dateOfBirth,
   });
 
@@ -101,10 +92,18 @@ const getAllArtists = async () => {
   return allArtistToFetch;
 };
 
+/**
+ * Fetch artist by email (to be used in the controller before uploading images)
+ */
+const getArtistByEmail = async (artistEmail) => {
+  return await Artist.findOne({ artistEmail }).select("artistEmail");
+};
+
 module.exports = {
   addArtist,
   updateArtist,
   deleteArtistById,
   getSingleArtistById,
   getAllArtists,
+  getArtistByEmail,
 };

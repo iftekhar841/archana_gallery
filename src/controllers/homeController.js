@@ -58,7 +58,7 @@ const addBanner = asyncHandler(async (req, res) => {
       banner: bannerResponnse,
     });
   } catch (error) {
-    console.error("Adding the banner failed !");
+    console.error("Adding the banner failed !", error);
     return res.status(500).json({
       success: false,
       message: error.message,

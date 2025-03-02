@@ -10,4 +10,6 @@ userRoute.post("/login", userController.userLogin);
 
 userRoute.post("/logout", verifyJWT, userController.userLogout);
 
+userRoute.get("/isLogin-user", verifyJWT, userController.isLoginUser);
+
 module.exports = userRoute;

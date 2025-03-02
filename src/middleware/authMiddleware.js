@@ -11,9 +11,7 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     console.log("token", token);
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized request: Token missing" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Verify if the secret key is provided

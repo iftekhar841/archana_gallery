@@ -29,7 +29,7 @@ const artistSchema = new mongoose.Schema(
     },
     presentAddress: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     description: {

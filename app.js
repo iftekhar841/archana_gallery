@@ -41,6 +41,7 @@ const {
   artWorkRoute,
   homeRoute,
   exhibitionRoute,
+  contactRoute,
 } = require("./src/routes/index.js");
 
 //routes declaration
@@ -49,6 +50,7 @@ app.use("/api/artist", artistRoute);
 app.use("/api/artWork", artWorkRoute);
 app.use("/api/banner", homeRoute);
 app.use("/api/exhibition", exhibitionRoute);
+app.use("/api/contact", contactRoute);
 
 app.get("/", (req, res) => {
   res.send("Now we are showing the data from here");

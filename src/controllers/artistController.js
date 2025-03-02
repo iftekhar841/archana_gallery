@@ -2,7 +2,11 @@ const artistService = require("../services/artistService");
 const asyncHandler = require("../utils/asyncHandler");
 const moment = require("moment");
 const mongoose = require("mongoose");
-const { uploadImageToCloudinary } = require("../utils/cloudinary");
+const {
+  uploadImageToCloudinary,
+  getPublicIdFromCloudinaryUrl,
+  deleteImageToCloudinary,
+} = require("../utils/cloudinary");
 
 const addArtist = asyncHandler(async (req, res) => {
   try {
@@ -18,16 +22,15 @@ const addArtist = asyncHandler(async (req, res) => {
       artistEmail,
       firstName,
       lastName,
-      presentAddress,
       description,
       dateOfBirth,
+      presentAddress,
     } = req.body;
 
     if (
       !artistEmail ||
       !firstName ||
       !lastName ||
-      !presentAddress ||
       !description ||
       !dateOfBirth
     ) {
@@ -43,6 +46,15 @@ const addArtist = asyncHandler(async (req, res) => {
       return res.status(403).json({
         success: false,
         message: "Unauthorized! Only admins can add artists.",
+      });
+    }
+
+    // Check if the artist already exists **before uploading the image**
+    const existingArtist = await artistService.getArtistByEmail(artistEmail);
+    if (existingArtist) {
+      return res.status(400).json({
+        success: false,
+        message: "Artist with the same email already exists.",
       });
     }
 
@@ -83,8 +95,8 @@ const addArtist = asyncHandler(async (req, res) => {
       firstName,
       lastName,
       artistImage: uploadedImageUrls, //Array of image URLs
-      presentAddress,
       description,
+      presentAddress,
       dateOfBirth: formattedDOB,
     });
     return res.status(201).json({
@@ -116,31 +128,61 @@ const updateArtist = asyncHandler(async (req, res) => {
     }
 
     const { artistId } = req.params;
-    // Validate artist Id
-    if (!artistId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Artist ID is required." });
-    }
-
     // Check if artistId is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(artistId)) {
+    if (!artistId || !mongoose.Types.ObjectId.isValid(artistId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Artist ID format.",
+        message: "Invalid or missing Artist ID format.",
       });
     }
 
-    // Validate request body
-    if (!req.body || !Object.keys(req.body).length) {
+    // ✅ Validate that at least one update field is provided in the body or files
+    const updateFields = req.body;
+    const hasBodyUpdates = updateFields && Object.keys(updateFields).length > 0;
+    const hasFileUpdates = req.files && req.files.artistImage;
+
+    if (!hasBodyUpdates && !hasFileUpdates) {
       return res.status(400).json({
         success: false,
         message: "At least one field is required for update.",
       });
     }
 
+    // ✅ Handle artist image update
+    let artistFiles = req.files?.artistImage;
+
+    console.log("🚀 ~ updateArtist ~ artistFiles:", artistFiles);
+    if (artistFiles) {
+      // Ensure artistFiles is an array
+      if (!Array.isArray(artistFiles)) {
+        artistFiles = [artistFiles];
+      }
+
+      // Fetch existing artist details
+      const existingArtist = await artistService.getSingleArtistById(artistId);
+      // Extract and delete existing images from Cloudinary
+      const publicIds = getPublicIdFromCloudinaryUrl(
+        existingArtist.artistImage
+      );
+      await deleteImageToCloudinary(
+        Array.isArray(publicIds) ? publicIds : [publicIds]
+      );
+
+      // Upload new images to Cloudinary
+      console.log("Uploading new images to Cloudinary...");
+      const uploadedImageUrls = await Promise.all(
+        artistFiles.map((file) => uploadImageToCloudinary(file, "artists"))
+      );
+
+      // Update artwork images in the request body
+      updateFields.artistImage = uploadedImageUrls;
+    }
+
     // Call service to update artist
-    const updatedArtist = await artistService.updateArtist(artistId, req.body);
+    const updatedArtist = await artistService.updateArtist(
+      artistId,
+      updateFields
+    );
 
     return res.status(200).json({
       success: true,
@@ -180,12 +222,22 @@ const deleteArtistById = asyncHandler(async (req, res) => {
     }
 
     // Check if artistId is a valid MongoDB ObjectId
+    const { artistId } = req.params;
     if (!artistId || !mongoose.Types.ObjectId.isValid(artistId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid or missing Artist ID format.",
       });
     }
+
+    const artistFetch = await artistService.getSingleArtistById(artistId);
+    console.log("🚀 ~ deleteArtistById ~ artistFetch:", artistFetch);
+
+    // Extract public ID and delete image from Cloudinary
+    const publicIds = getPublicIdFromCloudinaryUrl(artistFetch.artistImage);
+    await deleteImageToCloudinary(
+      Array.isArray(publicIds) ? publicIds : [publicIds]
+    );
 
     // Call service to delete artist
     const deletedArtist = await artistService.deleteArtistById(artistId);

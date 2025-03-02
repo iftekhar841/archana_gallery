@@ -14,19 +14,17 @@ const addArtWork = asyncHandler(async (req, res) => {
     let artworkFiles = req.files?.artWorkImage; // Get uploaded image(s)
     console.log(
       "Received Image(s):",
-      artworkFiles
-        ? artworkFiles.name || "Multiple files uploaded"
-        : "No image uploaded"
+      artworkFiles ? artworkFiles.name : "No image uploaded"
     );
 
-    const { artist, minPrice, maxPrice, description, artWorkName } = req.body;
+    const { artist, priceRange, description, artWorkName } = req.body;
 
     // Validate required text fields
-    if (!artist || !minPrice || !maxPrice || !description || !artWorkName) {
+    if (!artist || !priceRange || !description || !artWorkName) {
       return res.status(400).json({
         success: false,
         message:
-          "Missing required fields: artWorkName, artist, minPrice, maxPrice, and description.",
+          "Missing required fields: artWorkName, artist, priceRange, and description.",
       });
     }
 
@@ -54,29 +52,42 @@ const addArtWork = asyncHandler(async (req, res) => {
     if (!artworkFiles) {
       return res.status(400).json({
         success: false,
-        message:
-          "Artwork image(s) required. Please upload one or more artworks.",
+        message: "Artwork image(s) required. Please upload an artwork.",
       });
     }
 
-    // Ensure artworkFiles is an array (for multiple uploads)
-    if (!Array.isArray(artworkFiles)) {
-      artworkFiles = [artworkFiles]; // Convert single file object into an array
+    // // Ensure artworkFiles is an array (for multiple uploads)
+    // if (!Array.isArray(artworkFiles)) {
+    //   artworkFiles = [artworkFiles]; // Convert single file object into an array
+    // }
+
+    // ✅ If multiple files are uploaded, reject the request
+    if (Array.isArray(artworkFiles)) {
+      return res.status(400).json({
+        success: false,
+        message: "Only one artwork image is allowed.",
+      });
     }
 
-    // Upload each image to Cloudinary (inside 'artworks' folder)
-    console.log("Uploading images to Cloudinary...");
-    const uploadedImageUrls = await Promise.all(
-      artworkFiles.map((file) => uploadImageToCloudinary(file, "artworks"))
+    // // Upload each image to Cloudinary (inside 'artworks' folder)
+    // console.log("Uploading images to Cloudinary...");
+    // const uploadedImageUrls = await Promise.all(
+    //   artworkFiles.map((file) => uploadImageToCloudinary(file, "artworks"))
+    // );
+
+    // ✅ Upload single image to Cloudinary
+    console.log("Uploading image to Cloudinary...");
+    const uploadedImageUrl = await uploadImageToCloudinary(
+      artworkFiles,
+      "artworks"
     );
 
     // Save artwork details to the database
     const newArtwork = await artWorkService.addArtWork({
       artWorkName,
-      artWorkImage: uploadedImageUrls, // Array of image URLs
+      artWorkImage: uploadedImageUrl,
       artist: checkIsArtistExist,
-      minPrice,
-      maxPrice,
+      priceRange,
       description,
     });
 
