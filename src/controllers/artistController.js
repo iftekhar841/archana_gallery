@@ -235,6 +235,8 @@ const deleteArtistById = asyncHandler(async (req, res) => {
 
     // Extract public ID and delete image from Cloudinary
     const publicIds = getPublicIdFromCloudinaryUrl(artistFetch.artistImage);
+    console.log("🚀 ~ deleteArtistById ~ publicIds:", publicIds);
+
     await deleteImageToCloudinary(
       Array.isArray(publicIds) ? publicIds : [publicIds]
     );

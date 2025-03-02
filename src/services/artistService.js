@@ -61,7 +61,13 @@ const deleteArtistById = async (artistId) => {
     throw new Error("Artist does not exist or has already been deleted.");
   }
 
-  return deletedArtist;
+  const fetchAllArtist = await Artist.find();
+
+  if (!fetchAllArtist || fetchAllArtist.length === 0) {
+    throw new Error("No artist record found.");
+  }
+
+  return fetchAllArtist;
 };
 
 const getSingleArtistById = async (artistId, isAuthenticated) => {

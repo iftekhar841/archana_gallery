@@ -7,7 +7,7 @@ const artWorkSchema = new mongoose.Schema(
       required: true,
     },
     artWorkImage: {
-      type: String,
+      type: Array,
       required: true,
     },
     artist: {

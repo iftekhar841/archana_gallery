@@ -56,36 +56,21 @@ const addArtWork = asyncHandler(async (req, res) => {
       });
     }
 
-    // // Ensure artworkFiles is an array (for multiple uploads)
-    // if (!Array.isArray(artworkFiles)) {
-    //   artworkFiles = [artworkFiles]; // Convert single file object into an array
-    // }
-
-    // ✅ If multiple files are uploaded, reject the request
-    if (Array.isArray(artworkFiles)) {
-      return res.status(400).json({
-        success: false,
-        message: "Only one artwork image is allowed.",
-      });
+    // Ensure artworkFiles is an array (for multiple uploads)
+    if (!Array.isArray(artworkFiles)) {
+      artworkFiles = [artworkFiles]; // Convert single file object into an array
     }
 
-    // // Upload each image to Cloudinary (inside 'artworks' folder)
-    // console.log("Uploading images to Cloudinary...");
-    // const uploadedImageUrls = await Promise.all(
-    //   artworkFiles.map((file) => uploadImageToCloudinary(file, "artworks"))
-    // );
-
-    // ✅ Upload single image to Cloudinary
-    console.log("Uploading image to Cloudinary...");
-    const uploadedImageUrl = await uploadImageToCloudinary(
-      artworkFiles,
-      "artworks"
+    // Upload each image to Cloudinary (inside 'artworks' folder)
+    console.log("Uploading images to Cloudinary...");
+    const uploadedImageUrls = await Promise.all(
+      artworkFiles.map((file) => uploadImageToCloudinary(file, "artworks"))
     );
 
     // Save artwork details to the database
     const newArtwork = await artWorkService.addArtWork({
       artWorkName,
-      artWorkImage: uploadedImageUrl,
+      artWorkImage: uploadedImageUrls,
       artist: checkIsArtistExist,
       priceRange,
       description,
@@ -233,6 +218,8 @@ const deleteArtworkById = asyncHandler(async (req, res) => {
 
     // Extract public ID and delete image from Cloudinary
     const publicIds = getPublicIdFromCloudinaryUrl(artWorkFetch.artWorkImage);
+    console.log("publicId", publicIds);
+
     await deleteImageToCloudinary(
       Array.isArray(publicIds) ? publicIds : [publicIds]
     );
